@@ -1,4 +1,7 @@
 {
+ "id": "Calendario",
+  "start_url": "./",
+  "scope": "./",
   "name": "Calendario",
   "short_name": "Calendario",
   "description": "Calendario con estilo iOS 6",

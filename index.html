@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calendario</title>
+<style>
+:root{--nav1:#b3c1d6;--tb:#4a5d80;--line:#a9a9ac;--ink:#2a2a2d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0;overflow:hidden}
+body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;color:var(--ink);background:#dfe0e3;user-select:none;-webkit-user-select:none}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--nav1);z-index:40}
+body::after{content:"";position:fixed;inset:auto 0 0;height:env(safe-area-inset-bottom,0px);background:var(--tb);z-index:40}
+button,input{font:inherit;color:inherit}
+button{border:0;background:none;padding:0;cursor:pointer}
+#app{display:flex;flex-direction:column;height:100%}
+.nav{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 8px;background:linear-gradient(#bac7da,#93a6c2 49%,#7188a8 51%,#7d93b1);border-bottom:1px solid #2b3544;box-shadow:0 1px 3px rgba(0,0,0,.45);position:relative;z-index:5}
+.nav h1{margin:0;font-size:20px;font-weight:700;color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.5);letter-spacing:-.2px}
+.bb{height:30px;min-width:34px;padding:0 11px;border-radius:5px;border:1px solid #33425b;font-size:13px;font-weight:700;color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.5);background:linear-gradient(#9fb0cb,#6b83a6 50%,#5a7396 51%,#667fa2);box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 1px 0 rgba(255,255,255,.3)}
+.bb:active{background:linear-gradient(#4b6082,#3a4d6e 50%,#31435f 51%,#38496a)}
+.bb.blue{background:linear-gradient(#7fa2e0,#3e6fc2 50%,#2d5cb0 51%,#3a68bb)}
+.arrow{font-size:20px;line-height:1;padding-bottom:3px}
+#wk{flex:none;display:grid;grid-template-columns:repeat(7,1fr);height:22px;background:linear-gradient(#f6f6f7,#d3d4d7);border-bottom:1px solid #85858a}
+#wk span{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#505055;text-shadow:0 1px 0 #fff}
+#grid{flex:none;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:45px;touch-action:pan-y}
+.day{position:relative;padding-top:6px;font-size:19px;font-weight:700;color:#303034;text-shadow:0 1px 0 #fff;background:linear-gradient(#fefefe,#e8e8ea);box-shadow:inset -1px -1px 0 #b4b4b8,inset 1px 1px 0 #fff}
+.day.out{background:linear-gradient(#d6d6d9,#c4c4c8);color:#7d7d82;box-shadow:inset -1px -1px 0 #a6a6ab,inset 1px 1px 0 #e1e1e4}
+.day.today{background:linear-gradient(#d9e8fb,#a3c0e8);color:#173a75;box-shadow:inset -1px -1px 0 #7f9cc7,inset 1px 1px 0 #eef5ff}
+.day.sel{background:linear-gradient(#5f8dd0,#2a58a4 50%,#244f97 51%,#2b5aa6);color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.5);box-shadow:inset 0 2px 5px rgba(0,0,0,.5),inset -1px -1px 0 #1a3d77}
+.day i{position:absolute;left:0;right:0;bottom:5px;display:flex;justify-content:center;gap:3px;font-style:normal}
+.day b{width:6px;height:6px;border-radius:50%;box-shadow:0 1px 0 rgba(255,255,255,.7),inset 0 1px 1px rgba(0,0,0,.25)}
+.day.sel b{box-shadow:0 0 0 1px #fff}
+#dayhead{flex:none;height:25px;display:flex;align-items:center;padding:0 12px;font-size:14px;font-weight:700;color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.45);background:linear-gradient(#a9b3c1,#8793a5);border-top:1px solid #6f7a8a;border-bottom:1px solid #6f7a8a;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.linen{background-color:#dcdde1;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.22) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.04) 0 1px,transparent 1px 3px)}
+#list{flex:1;overflow-y:auto;padding:12px 10px}
+.group{background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden;box-shadow:0 1px 0 rgba(255,255,255,.8)}
+.row{width:100%;display:flex;align-items:center;gap:10px;padding:11px 12px;text-align:left;border-bottom:1px solid #d0d0d4;background:#fff}
+.row:last-child{border-bottom:0}
+.row:active{background:linear-gradient(#5f8dd0,#2a58a4);color:#fff}
+.tm{width:62px;flex:none;text-align:right;font-size:12px;font-weight:700;color:#4b6aa3}
+.row:active .tm{color:#fff}
+.bar{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.tt{font-size:16px;font-weight:700;flex:1;min-width:0;overflow-wrap:anywhere}
+.empty{margin:28px 0;text-align:center;font-size:18px;font-weight:700;color:#8a8a90;text-shadow:0 1px 0 #fff}
+#tb{flex:none;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 8px;background:linear-gradient(#8a9cb7,#5b6f92 49%,#4a5d80 51%,#53668a);border-top:1px solid #2b3544;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+#sheet{position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);transform:translateY(100%);transition:transform .32s cubic-bezier(.2,.8,.3,1);visibility:hidden}
+#sheet.open{transform:none;visibility:visible}
+#sheet .nav{padding-top:0}
+#sheet .linen{flex:1;overflow-y:auto;padding:16px 10px}
+.f{display:flex;align-items:center;gap:10px;padding:0 12px;min-height:46px;border-bottom:1px solid #d0d0d4;font-size:16px;font-weight:700}
+.f:last-child{border-bottom:0}
+.f span{width:56px;flex:none;color:#4b6aa3;font-size:14px}
+.f input{flex:1;min-width:0;border:0;background:none;outline:0;font-size:16px;font-weight:400;height:44px;-webkit-user-select:text;user-select:text}
+.sw{display:flex;gap:14px;flex:1;justify-content:flex-end}
+.sw button{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #8a8a90,inset 0 -4px 6px rgba(0,0,0,.25)}
+.sw button.on{box-shadow:0 0 0 3px #2a58a4,inset 0 -4px 6px rgba(0,0,0,.25)}
+#del{display:none;width:100%;height:46px;margin-top:20px;border-radius:9px;border:1px solid #6a0f0a;font-size:17px;font-weight:700;color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.5);background:linear-gradient(#e8786f,#c3342a 50%,#a82219 51%,#b82b21);box-shadow:inset 0 1px 0 rgba(255,255,255,.45)}
+#year{display:none;flex:1;overflow-y:auto;padding:12px 8px;grid-template-columns:repeat(3,1fr);gap:10px 8px;align-content:start}
+#app.yr #year{display:grid}
+#app.yr #wk,#app.yr #grid,#app.yr #dayhead,#app.yr #list{display:none}
+.mo{background:linear-gradient(#fefefe,#ebebed);border:1px solid var(--line);border-radius:7px;padding:6px 5px 7px;text-align:left;box-shadow:0 1px 0 rgba(255,255,255,.8)}
+.mo:active{background:linear-gradient(#cfdcf0,#a3bde6)}
+.mo.cur{border-color:#2a58a4;box-shadow:0 0 0 2px #5f8dd0}
+.mo h2{margin:0 0 3px 2px;font-size:13px;font-weight:700;color:#2a58a4;text-shadow:0 1px 0 #fff}
+.mg{display:grid;grid-template-columns:repeat(7,1fr);font-size:9px;line-height:14px;text-align:center;color:#3a3a3e;font-weight:700}
+.mg .o{visibility:hidden}
+.mg .e{color:#2f78d6;text-decoration:underline;text-decoration-thickness:2px}
+.mg .t{background:linear-gradient(#5f8dd0,#2a58a4);color:#fff;border-radius:4px}
+@media (prefers-reduced-motion:reduce){#sheet{transition:none}}
+</style>
+<meta name="theme-color" content="#b3c1d6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Calendario">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+</head>
+<body>
+<div id="app">
+  <div class="nav">
+    <button class="bb arrow" id="prev" aria-label="Mes anterior">‹</button>
+    <h1 id="title"></h1>
+    <button class="bb arrow" id="next" aria-label="Mes siguiente">›</button>
+  </div>
+  <div id="wk"><span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+  <div id="grid"></div>
+  <div id="dayhead"></div>
+  <div id="list" class="linen"></div>
+  <div id="year" class="linen"></div>
+  <div id="tb">
+    <button class="bb" id="today">Hoy</button>
+    <button class="bb" id="yrbtn">Año</button>
+    <button class="bb arrow" id="add" aria-label="Añadir evento">+</button>
+  </div>
+</div>
+
+<div id="sheet" aria-hidden="true">
+  <div class="nav">
+    <button class="bb" id="cancel">Cancelar</button>
+    <h1 id="sh">Nuevo evento</h1>
+    <button class="bb blue" id="ok">Guardar</button>
+  </div>
+  <div class="linen">
+    <div class="group">
+      <label class="f"><span>Título</span><input id="ft" placeholder="Evento" autocomplete="off"></label>
+      <label class="f"><span>Fecha</span><input id="fd" type="date"></label>
+      <label class="f"><span>Hora</span><input id="fh" type="time"></label>
+      <div class="f"><span>Color</span><div class="sw" id="sw"></div></div>
+    </div>
+    <button id="del">Eliminar evento</button>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const key=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const COLORS=['#d9392e','#f0902a','#52a63c','#2f78d6','#8a4fb8'];
+let yr=false,ev=[],today=new Date(),view=new Date(today.getFullYear(),today.getMonth(),1),sel=key(today),editing=null,color=3;
+
+function seed(){
+  const d=o=>{const x=new Date(today);x.setDate(x.getDate()+o);return key(x)};
+  ev=[{id:1,t:'Desayuno con Marta',d:d(0),h:'09:00',c:1},{id:2,t:'Revisión del proyecto',d:d(0),h:'12:30',c:3},{id:3,t:'Cumpleaños de Lucía',d:d(0),h:'',c:0},{id:4,t:'Dentista',d:d(3),h:'17:15',c:2},{id:5,t:'Cena en casa',d:d(6),h:'21:00',c:4}];
+}
+function load(){try{const r=localStorage.getItem('cal-ios6');if(r){ev=JSON.parse(r);return}}catch(e){}seed()}
+function save(){try{localStorage.setItem('cal-ios6',JSON.stringify(ev))}catch(e){}}
+
+function yearRender(){
+  const y=view.getFullYear(),tk=key(today);let h='';
+  $('#title').textContent=y;
+  for(let m=0;m<12;m++){
+    const name=cap(new Intl.DateTimeFormat('es',{month:'long'}).format(new Date(y,m,1)));
+    const off=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate();let c='';
+    for(let i=0;i<off;i++)c+='<span class="o">0</span>';
+    for(let d=1;d<=n;d++){const k=y+'-'+pad(m+1)+'-'+pad(d);c+=`<span class="${k===tk?'t':ev.some(e=>e.d===k)?'e':''}">${d}</span>`}
+    h+=`<button class="mo${m===today.getMonth()&&y===today.getFullYear()?' cur':''}" data-m="${m}"><h2>${name}</h2><div class="mg">${c}</div></button>`;
+  }
+  $('#year').innerHTML=h;
+}
+function render(){
+  $('#app').classList.toggle('yr',yr);
+  if(yr){yearRender();return}
+  $('#title').textContent=cap(new Intl.DateTimeFormat('es',{month:'long',year:'numeric'}).format(view));
+  const off=(view.getDay()+6)%7,tk=key(today);let h='';
+  for(let i=0;i<42;i++){
+    const d=new Date(view.getFullYear(),view.getMonth(),1-off+i),k=key(d);
+    const cs=[...new Set(ev.filter(e=>e.d===k).map(e=>e.c))].slice(0,4);
+    h+=`<button class="day${d.getMonth()!==view.getMonth()?' out':''}${k===tk?' today':''}${k===sel?' sel':''}" data-k="${k}">${d.getDate()}<i>${cs.map(c=>`<b style="background:${COLORS[c]}"></b>`).join('')}</i></button>`;
+  }
+  $('#grid').innerHTML=h;
+  list();
+}
+function list(){
+  const [y,m,d]=sel.split('-').map(Number);
+  $('#dayhead').textContent=cap(new Intl.DateTimeFormat('es',{weekday:'long',day:'numeric',month:'long'}).format(new Date(y,m-1,d)));
+  const es=ev.filter(e=>e.d===sel).sort((a,b)=>(a.h||'').localeCompare(b.h||''));
+  $('#list').innerHTML=es.length
+    ?'<div class="group">'+es.map(e=>`<button class="row" data-id="${e.id}"><span class="tm">${e.h||'todo el día'}</span><span class="bar" style="background:${COLORS[e.c]}"></span><span class="tt">${esc(e.t)}</span></button>`).join('')+'</div>'
+    :'<p class="empty">Sin eventos</p>';
+}
+
+function go(delta){view=new Date(view.getFullYear(),view.getMonth()+delta*(yr?12:1),1);render()}
+$('#prev').onclick=()=>go(-1);
+$('#next').onclick=()=>go(1);
+$('#today').onclick=()=>{today=new Date();view=new Date(today.getFullYear(),today.getMonth(),1);sel=key(today);render()};
+$('#grid').addEventListener('click',e=>{
+  const b=e.target.closest('.day');if(!b)return;
+  sel=b.dataset.k;const [y,m]=sel.split('-').map(Number);
+  if(m-1!==view.getMonth())view=new Date(y,m-1,1);
+  render();
+});
+let sx=null;
+$('#grid').addEventListener('touchstart',e=>{sx=e.touches[0].clientX},{passive:true});
+$('#grid').addEventListener('touchend',e=>{
+  if(sx===null)return;const dx=e.changedTouches[0].clientX-sx;sx=null;
+  if(Math.abs(dx)>50)go(dx<0?1:-1);
+});
+
+function swatches(){
+  $('#sw').innerHTML=COLORS.map((c,i)=>`<button type="button" class="${i===color?'on':''}" data-c="${i}" style="background:${c}" aria-label="Color ${i+1}"></button>`).join('');
+}
+$('#sw').onclick=e=>{const b=e.target.closest('button');if(!b)return;color=+b.dataset.c;swatches()};
+function openSheet(id){
+  editing=id;const e=ev.find(x=>x.id===id);
+  $('#sh').textContent=e?'Editar evento':'Nuevo evento';
+  $('#ft').value=e?e.t:'';$('#fd').value=e?e.d:sel;$('#fh').value=e?e.h:'';
+  color=e?e.c:3;swatches();
+  $('#del').style.display=e?'block':'none';
+  $('#sheet').classList.add('open');$('#sheet').setAttribute('aria-hidden','false');
+}
+function closeSheet(){$('#sheet').classList.remove('open');$('#sheet').setAttribute('aria-hidden','true');document.activeElement&&document.activeElement.blur()}
+$('#add').onclick=()=>openSheet(null);
+$('#list').addEventListener('click',e=>{const b=e.target.closest('.row');if(b)openSheet(+b.dataset.id)});
+$('#cancel').onclick=closeSheet;
+$('#ok').onclick=()=>{
+  const o={t:$('#ft').value.trim()||'Sin título',d:$('#fd').value||sel,h:$('#fh').value,c:color};
+  if(editing){Object.assign(ev.find(x=>x.id===editing),o)}
+  else{ev.push({id:Date.now(),...o})}
+  save();sel=o.d;const [y,m]=sel.split('-').map(Number);view=new Date(y,m-1,1);
+  closeSheet();render();
+};
+$('#del').onclick=()=>{ev=ev.filter(x=>x.id!==editing);save();closeSheet();render()};
+
+$('#yrbtn').onclick=()=>{yr=!yr;$('#yrbtn').textContent=yr?'Mes':'Año';render()};
+$('#year').addEventListener('click',e=>{
+  const b=e.target.closest('.mo');if(!b)return;
+  view=new Date(view.getFullYear(),+b.dataset.m,1);
+  sel=(today.getFullYear()===view.getFullYear()&&today.getMonth()===view.getMonth())?key(today):key(view);
+  yr=false;$('#yrbtn').textContent='Año';render();
+});
+
+load();render();
+</script>
+<script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
+</body>
+</html>
